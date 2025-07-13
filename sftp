@@ -1,0 +1,43 @@
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { Button, Text, Flex, Card } from '@/ui'; // Assume Card import; adjust once code shared
+import type { GetOrgSetupOutput } from '@/features/org-setup/useOrgSetup';
+
+const SFTPStatusPage: React.FC = () => {
+  const router = useRouter();
+  const [rowData, setRowData] = useState<GetOrgSetupOutput | null>(null);
+
+  useEffect(() => {
+    const { data } = router.query;
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(data));
+        setRowData(parsed);
+      } catch (error) {
+        console.error('Failed to parse row data:', error);
+      }
+    }
+  }, [router.query]);
+
+  if (!rowData) {
+    return <Text>No data available. Navigate back and try again.</Text>;
+  }
+
+  return (
+    <Flex direction="column" gap={4}>
+      <Button variant="outline" size="sm" onClick={() => router.back()}>
+        Back to Org Setup
+      </Button>
+      <Card className="p-4"> {/* Placeholder; adjust props based on your Card component code */}
+        <Text fontWeight="bold">SFTP Status for Org: {rowData.orgCd}</Text>
+        {/* Display key fields; customize */}
+        <Text>Cycle: {rowData.cycle}</Text>
+        <Text>File Type: {rowData.file_type}</Text>
+        <Text>Has Header: {rowData.has_header ? 'Yes' : 'No'}</Text>
+        {/* Add more fields or SFTP-specific content */}
+      </Card>
+    </Flex>
+  );
+};
+
+export default SFTPStatusPage;

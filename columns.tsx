@@ -1,48 +1,48 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
+import { useRouter } from 'next/router';
 import { dataTableFilterVariants } from '@/constants';
-import { Text } from '@/ui'; // Assuming this is your custom Text component; adjust if needed
-import { Popover, PopoverContent, PopoverTrigger } from '@/ui/Popover'; // Adjust path based on your ui folder structure
-
-// Other imports (e.g., filterVariant, meta, etc.) remain the same...
-
-import type { GetOrgSetupOutput } from '@/features/org-setup/useOrgSetup'; // Adjust path as needed
+import { Text, Button, Flex } from '@/ui'; // Adjust paths
+import type { GetOrgSetupOutput } from '@/features/org-setup/useOrgSetup';
 
 const orgSetupColumns: ColumnDef<GetOrgSetupOutput>[] = [
-  // ... All your previous columns here (e.g., Refresh, File Type, Has Header, Delimiter, Custom Logic, Cycle, Org Log, etc.) ...
+  // ... All your existing columns (e.g., Refresh, File Type, ..., notifyChanges) ...
 
   {
-    header: 'Change Log / Revision Notes',
-    accessorKey: 'notifyChanges',
+    id: 'actions', // Custom ID for actions column
+    header: 'Actions',
     cell: ({ row }) => {
-      const fullText = row.getValue('notifyChanges') as string || 'No changes';
-      const maxLength = 100; // Adjust this truncation length as needed
-      const truncatedText = fullText.length > maxLength ? `${fullText.substring(0, maxLength)}...` : fullText;
+      const router = useRouter();
+      const rowData = row.original; // Full row data
+
+      const handleNavigate = (path: string) => {
+        const serializedData = encodeURIComponent(JSON.stringify(rowData));
+        router.push(`${path}?data=${serializedData}`);
+      };
 
       return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Text
-              className="h-10 overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer text-blue-600 underline"
-            >
-              {truncatedText}
-            </Text>
-          </PopoverTrigger>
-          <PopoverContent className="w-96 p-4"> {/* Adjust width/padding if needed for longer texts */}
-            <Text>{fullText}</Text>
-          </PopoverContent>
-        </Popover>
+        <Flex direction="row" gap={2} className="justify-center">
+          <Button 
+            variant="primary" 
+            size="sm" 
+            onClick={() => handleNavigate('/sftp-status')}
+          >
+            SFTP Status
+          </Button>
+          <Button 
+            variant="primary" 
+            size="sm" 
+            onClick={() => handleNavigate('/data-analysis')}
+          >
+            Data Analysis
+          </Button>
+        </Flex>
       );
     },
-    size: 211,
-    enableColumnFilter: true,
-    enableSorting: true,
-    meta: {
-      filterVariant: dataTableFilterVariants.MULTI_SELECT_DROPDOWN,
-    },
+    size: 250, // Fixed width to fit buttons
+    enableColumnFilter: false,
+    enableSorting: false,
   },
-
-  // ... Any remaining columns ...
 ];
 
 export default orgSetupColumns;
