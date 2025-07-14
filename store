@@ -1,0 +1,12 @@
+import { create } from 'zustand';
+import type { GetOrgSetupOutput } from '@/types';
+
+interface OrgSetupState {
+  selectedRow: GetOrgSetupOutput | null;
+  setSelectedRow: (row: GetOrgSetupOutput | null) => void;
+}
+
+export const useOrgSetupStore = create<OrgSetupState>((set) => ({
+  selectedRow: null,
+  setSelectedRow: (row) => set({ selectedRow: row }),
+}));
