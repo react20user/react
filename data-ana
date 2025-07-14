@@ -1,43 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { Button, Text, Flex, Card } from '@/ui'; // Assume Card import; adjust once code shared
+'use client';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useOrgSetupStore } from '@/store/orgSetupStore';
+import { Card, Button, Text, Flex } from '@/ui'; // Adjust paths
 import type { GetOrgSetupOutput } from '@/features/org-setup/useOrgSetup';
 
-const DataAnalysisPage: React.FC = () => {
+export default function DataAnalysisPage() {
   const router = useRouter();
-  const [rowData, setRowData] = useState<GetOrgSetupOutput | null>(null);
+  const selectedRow = useOrgSetupStore((state) => state.selectedRow);
 
-  useEffect(() => {
-    const { data } = router.query;
-    if (typeof data === 'string') {
-      try {
-        const parsed = JSON.parse(decodeURIComponent(data));
-        setRowData(parsed);
-      } catch (error) {
-        console.error('Failed to parse row data:', error);
-      }
-    }
-  }, [router.query]);
-
-  if (!rowData) {
+  if (!selectedRow) {
     return <Text>No data available. Navigate back and try again.</Text>;
   }
 
   return (
     <Flex direction="column" gap={4}>
-      <Button variant="outline" size="sm" onClick={() => router.back()}>
+      <Button variant="outline" size="sm" onClick={() => router.push('/org-setup')}>
         Back to Org Setup
       </Button>
-      <Card className="p-4"> {/* Placeholder; adjust props based on your Card component code */}
-        <Text fontWeight="bold">Data Analysis for Org: {rowData.orgCd}</Text>
-        {/* Display key fields; customize */}
-        <Text>Cycle: {rowData.cycle}</Text>
-        <Text>File Type: {rowData.file_type}</Text>
-        <Text>Custom Logic: {rowData.custom_logic}</Text>
-        {/* Add more fields or analysis-specific content */}
+      <Card className="p-4">
+        <Text fontWeight="bold">Data Analysis for Org: {selectedRow.orgCd}</Text>
+        <Text>Cycle: {selectedRow.cycle}</Text>
+        <Text>File Type: {selectedRow.file_type}</Text>
+        <Text>Custom Logic: {selectedRow.custom_logic}</Text>
+        {/* Add more fields as needed; customize analysis-specific content */}
       </Card>
     </Flex>
   );
-};
-
-export default DataAnalysisPage;
+}
