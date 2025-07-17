@@ -28,7 +28,7 @@ const Chatbot: Component = () => {
       const botMessage: Message = { role: 'bot', content: data.data.response };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      setMessages((prev) => [...prev, { role: 'bot', content: 'Sorry, something went wrong. Try again.' } as Message]);
+      setMessages((prev) => [...prev, { role: 'bot', content: 'Sorry, something went wrong. Try again.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -53,11 +53,8 @@ const Chatbot: Component = () => {
       {isOpen && (
         <Flex
           direction="column"
-          className="fixed bottom-20 right-4 w-80 h-96 bg-white shadow-lg z-50 overflow-hidden"
+          className="fixed bottom-20 right-4 w-80 h-96 bg-white shadow-lg z-50 overflow-hidden border border-solid border-gray-15"
           radius="md"
-          border="1"
-          borderColor="gray-15"
-          borderStyle="solid"
         >
           {/* Header */}
           <Box background="blue" padding="3">
@@ -75,7 +72,7 @@ const Chatbot: Component = () => {
           </Flex>
 
           {/* Input row */}
-          <Flex direction="row" align="center" padding="2" borderT="1" borderColor="gray-15">
+          <Flex direction="row" align="center" padding="2" className="border-t border-solid border-gray-15">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -94,29 +91,3 @@ const Chatbot: Component = () => {
 };
 
 export default Chatbot;
-
-
-import { cvsHealthSans } from '@/styles/fonts';
-import '@/styles/globals.css';
-import { Loader } from '@/ui/Loader';
-import type { Layout } from '@/types';
-import type { Metadata } from 'next';
-import Chatbot from './chat/Chatbot';  // Adjust path if needed based on folder structure
-
-export const metadata: Metadata = {
-  title: 'VBC DTXP',
-  description: 'Dashboard',
-};
-
-const RootLayout: Layout = ({ children }) => (
-  <html lang="en" className="cvsHealthSans.variable">
-    <body className="antialiased">
-      <Suspense fallback={<Loader />}>
-        <App>{children}</App>
-      </Suspense>
-      <Chatbot />  {/* Adds the floating chatbot icon and window globally */}
-    </body>
-  </html>
-);
-
-export default RootLayout;
