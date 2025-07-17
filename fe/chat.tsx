@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { Component } from '@types';
-import { Flex, Box, Text, Input, Button, Loader, Card } from '@ui';
-import ChatBotIcon from '@icons/ChatBotIcon';
+import { Flex, Box, Text, Input, Button, Loader, Card } from '@/ui';
+import ChatBotIcon from '@/icons/ChatBotIcon';
+import type { Component } from '@/types';
 
 type Message = { role: 'user' | 'bot'; content: string };
 
@@ -13,7 +13,7 @@ const Chatbot: Component = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    const userMessage = { role: 'user', content: input };
+    const userMessage: Message = { role: 'user', content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -25,10 +25,10 @@ const Chatbot: Component = () => {
       });
       if (!response.ok) throw new Error('API error');
       const data = await response.json();
-      const botMessage = { role: 'bot', content: data.data.response };
+      const botMessage: Message = { role: 'bot', content: data.data.response };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      setMessages((prev) => [...prev, { role: 'bot', content: 'Sorry, something went wrong. Try again.' }]);
+      setMessages((prev) => [...prev, { role: 'bot', content: 'Sorry, something went wrong. Try again.' } as Message]);
     } finally {
       setIsLoading(false);
     }
