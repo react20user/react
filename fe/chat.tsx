@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Flex, Box, Text, Input, Button, Loader, Card } from '@/ui';
 import ChatBotIcon from '@/icons/ChatBotIcon';
 import type { Component } from '@/types';
+import { cn } from '@/lib/cn';
 
 type Message = { role: 'user' | 'bot'; content: string };
 
@@ -36,56 +37,55 @@ const Chatbot: Component = () => {
 
   return (
     <>
-      {/* Floating trigger icon - position fixed bottom-right, match page style */}
+      {/* Floating trigger icon - no visible wrapper, just the icon */}
       <Box
         as="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 z-50 cursor-pointer rounded-full bg-blue-600 p-3 shadow-md hover:bg-blue-700 transition-colors"
+        className={cn("fixed bottom-4 right-4 z-50 cursor-pointer")}
       >
-        <ChatBotIcon width="24" height="24" fill="white" />
+        <ChatBotIcon width="48" height="48" fill="blue" />
       </Box>
 
       {/* Chat window - shown when open, fixed position, match page with white bg, subtle borders */}
       {isOpen && (
         <Flex
           direction="column"
-          className="fixed bottom-20 right-4 w-80 h-96 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden"
+          className={cn("fixed bottom-20 right-4 w-80 h-96 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden")}
         >
           {/* Header - blue to match accents */}
-          <Box className="bg-blue-600 p-3 text-white font-medium text-lg">
+          <Box className={cn("bg-blue-600 p-3 text-white font-medium text-lg")}>
             <Text>Chatbot</Text>
           </Box>
 
           {/* Message list - scrollable, with padding */}
-          <Flex direction="column" gap="2" className="flex-1 overflow-y-auto p-3 bg-gray-50">
+          <Flex direction="column" gap="2" className={cn("flex-1 overflow-y-auto p-3 bg-gray-50")}>
             {messages.map((msg, index) => (
               <Box
                 key={index}
-                className={`max-w-[80%] p-2 rounded-lg ${
-                  msg.role === 'user'
-                    ? 'bg-gray-200 text-black self-end'
-                    : 'bg-blue-100 text-black self-start'
-                }`}
+                className={cn(
+                  "max-w-[80%] p-2 rounded-lg",
+                  msg.role === 'user' ? "bg-gray-200 text-black self-end" : "bg-blue-100 text-black self-start"
+                )}
               >
-                <Text className="text-sm">{msg.content}</Text>
+                <Text className={cn("text-sm")}>{msg.content}</Text>
               </Box>
             ))}
-            {isLoading && <Loader className="self-center" />}
+            {isLoading && <Loader className={cn("self-center")} />}
           </Flex>
 
           {/* Input row - with border top */}
-          <Flex direction="row" align="center" className="p-2 border-t border-gray-200 bg-white">
+          <Flex direction="row" align="center" className={cn("p-2 border-t border-gray-200 bg-white")}>
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-500 disabled:opacity-50"
+              className={cn("flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-500 disabled:opacity-50")}
               disabled={isLoading}
             />
             <Button
               onClick={handleSend}
               disabled={isLoading || !input}
-              className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className={cn("ml-2 bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors")}
             >
               Send
             </Button>
