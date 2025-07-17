@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flex, Box, Text, Input, Button, Loader, Card } from '@/ui';
+import { Flex, Box, Text, Input, Button, Loader } from '@/ui';
 import ChatBotIcon from '@/icons/ChatBotIcon';
 import type { Component } from '@/types';
 
@@ -28,7 +28,7 @@ const Chatbot: Component = () => {
       const botMessage: Message = { role: 'bot', content: data.data.response };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      setMessages((prev) => [...prev, { role: 'bot', content: 'Sorry, something went wrong. Try again.' }]);
+      setMessages((prev) => [...prev, { role: 'bot', content: 'Sorry, something went wrong. Try again.' } as Message]);
     } finally {
       setIsLoading(false);
     }
@@ -53,8 +53,12 @@ const Chatbot: Component = () => {
       {isOpen && (
         <Flex
           direction="column"
-          className="fixed bottom-20 right-4 w-80 h-96 bg-white shadow-lg z-50 overflow-hidden border border-solid border-gray-15"
+          className="fixed bottom-20 right-4 w-80 h-96 shadow-lg z-50 overflow-hidden"
           radius="md"
+          border="1"
+          borderColor="gray-15"
+          borderStyle="solid"
+          background="white"
         >
           {/* Header */}
           <Box background="blue" padding="3">
@@ -64,15 +68,20 @@ const Chatbot: Component = () => {
           {/* Message list - scrollable */}
           <Flex direction="column" gap="2" padding="3" className="flex-1 overflow-y-auto">
             {messages.map((msg, index) => (
-              <Card key={index} radius="sm" background={msg.role === 'user' ? 'gray-5' : 'blue-5'} padding="2">
+              <Box
+                key={index}
+                radius="sm"
+                background={msg.role === 'user' ? 'gray-5' : 'blue-5'}
+                padding="2"
+              >
                 <Text size="label-1" color="black">{msg.content}</Text>
-              </Card>
+              </Box>
             ))}
             {isLoading && <Loader />}
           </Flex>
 
           {/* Input row */}
-          <Flex direction="row" align="center" padding="2" className="border-t border-solid border-gray-15">
+          <Flex direction="row" align="center" padding="2" className="border-t border-gray-15">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
