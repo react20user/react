@@ -1,183 +1,121 @@
-// @ts-nocheck
-'use client';
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
-import { getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
-import { orgSetupColumns } from '@/components/OrgSetup/Columns';  // Adjusted based on screenshots; update if needed
-import constants, { sortTypes } from '@/constants';
-import { useOrgSetupData } from '@/features/orgsetup/useOrgSetupData';  // Assuming this is the query hook
-import type { PaginationState, SortingState, ColumnFilter, Table } from '@tanstack/react-table';
-import type { PaginatedOutput } from '@/types/axios.types';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useFilterStore } from '@/store/useFilterStore';  // Assuming from screenshots
-
-// Interfaces from screenshots
-export interface GetOrgSetupDataHookParams {
-  page?: number;
-  limit: number;
-  bgRowLimit?: number;
-  cycle: string[];
-  orgLog: string[];
-  orgCd: string[];
-  engmtManager: string[];
-  acoAnalyst: string[];
-  sortBy: string;
-  sortType: string;
-  lastCursor?: { dx_cycle?: string; last_org_log?: string };
-}
-
-interface GetOrgSetupOutput {
-  cycle: string | null;
-  orgLog: string | null;
-  orgCd: string | null;
-  engmtManager: string | null;
-  acoAnalyst: string | null;
-  file?: string | null;
-  refresh?: string | null;
-  file_type?: string | null;
-  has_header?: string | null | boolean; // or boolean if needed
-  delimiter?: string | null;
-  custom_logic?: string | null;
-}
-
-interface GetOrgSetupFinalOutput {
-  data: GetOrgSetupOutput[];
+export interface GetOrgSetupFinalOutput {
+  data: GetOrgSetupOutput;
   total: number;
   limit: number;
 }
 
-export type OrgSetupHookOutput {
-  membersDataHookData: UseQueryResult<PaginatedOutput<GetOrgSetupFinalOutput>>;
+interface OrgSetupHookOutput {
+  membersDataHookData: UseQueryResult<PaginatedOutput<GetOrgSetupFinalOutput> | undefined>;
   table: Table<GetOrgSetupOutput>;
 }
 
 export type OrgSetupHook = () => OrgSetupHookOutput;
 
 export const useOrgSetup: OrgSetupHook = () => {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: constants.DEFAULT_PAGE,
-    pageSize: 200, // Updated default to 200
-  });
-
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'cycle', desc: true },
-  ]);
-
-  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
-
-  const [allData, setAllData] = useState<GetOrgSetupOutput[]>([]);
-  const [lastCursor, setLastCursor] = useState<{ dx_cycle?: string; last_org_log?: string } | undefined>(undefined);
-  const [totalRecords, setTotalRecords] = useState(0);
-
-  // OPTIMIZE: Memoize initial state
-  const colFiltersInitialState = useMemo(() => ({
-    cycle: [],
-    orgLog: [],
-    orgCd: [],
-    engmtManager: [],
-    acoAnalyst: [],
-  }), []);
-
   const membersParams = useMemo(() => {
     const colFilters = columnFilters.reduce((acc, val) => {
-      const id = val.id;
-      const value = val.value as string | string[];
-      const valueArrayType = Array.isArray(value) ? value : (value ? [value] : []);
-      switch (id) {
-        case 'cycle':
-          acc.cycle = valueArrayType;
-          break;
-        case 'orgLog':
-          acc.orgLog = valueArrayType;
-          break;
-        case 'orgCd':
-          acc.orgCd = valueArrayType;
-          break;
-        case 'engmtManager':
-          acc.engmtManager = valueArrayType;
-          break;
-        case 'acoAnalyst':
-          acc.acoAnalyst = valueArrayType;
-          break;
-        default:
-          break;
-      }
-      return acc;
-    }, { ...colFiltersInitialState });
+      const { id, value } = val;
+      const valueArrayType = value as string[];
+      return {
+        ...acc,
+        ...(id === 'cycle' ? { cycle: valueArrayType } : null),
+        ...(id === 'orgLog' ? { orgLog: valueArrayType } : null),
+        ...(id === 'orgCd' ? { orgCd: valueArrayType } : null),
+        ...(id === 'engmtManager' ? { engmtManager: valueArrayType } : null),
+        ...(id === 'acoAnalyst' ? { acoAnalyst: valueArrayType } : null),
+      };
+    }, {});
 
-    const { id, desc } = sorting[0] ?? { id: 'cycle', desc: true };
+    const allFiltersEmpty = Object.values(colFilters).every((arr: string[]) => arr.length === 0);
+
+    const { id, desc } = sorting[0] ?? {};
 
     return {
-      limit: pagination.pageSize,
       ...colFilters,
+      ...(allFiltersEmpty ? { limit: 100 } : {}),
+      ...lastCursor,
       sortBy: id,
-      sortType: desc ? sortTypes.DESC : sortTypes.ASC,
-      ...(lastCursor ? { lastCursor } : {}), // FIX: Only include lastCursor if defined to avoid undefined in query params
+      sortType: desc === undefined ? sortTypes.DESC : desc ? sortTypes.DESC : sortTypes.ASC,
     };
-  }, [columnFilters, sorting, pagination.pageSize, lastCursor, colFiltersInitialState]);
+  }, [columnFilters, lastCursor, sorting]);
 
-  const membersDataHookData = useOrgSetupData(membersParams);
+  const membersDataHookData = useOrgSetupData({ ...membersParams });
+  const { data: fetchedData } = membersDataHookData; // Assuming fetchedData = { data: array, total: number }
 
-  // FIX: Reset allData, lastCursor, and totalRecords on filter or sorting changes
+  const [allData, setAllData] = useState<GetOrgSetupOutput[]>([]);
+  const [lastCursor, setLastCursor] = useState<{ last_dx_cycle?: string; last_org_log?: string }>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: 'cycle',
+      desc: true,
+    },
+  ]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: constants.DEFAULT_PAGE,
+    pageSize: constants.DEFAULT_LIMIT_FOR_ORGSETUP,
+  });
+
+  const totalFiles = useFilterStore((state) => state.totalFiles);
+
+  // Update totalFiles from fetch (assuming server returns total)
+  useEffect(() => {
+    if (fetchedData?.total) {
+      useFilterStore.setState({ totalFiles: fetchedData.total });
+    }
+  }, [fetchedData?.total]);
+
+  // Append new data on fetch completion
+  useEffect(() => {
+    if (fetchedData?.data) {
+      setAllData((prev) => [...prev, ...fetchedData.data]);
+    }
+  }, [fetchedData?.data]);
+
+  // Reset allData, lastCursor, and pagination on filters or sorting change
   useEffect(() => {
     setAllData([]);
-    setLastCursor(undefined);
-    setTotalRecords(0);
+    setLastCursor({});
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [columnFilters, sorting]);
 
-  // FIX: Extend dependency to sorting so page resets on sort change
+  // Trigger fetch more if current page needs data (chains if needed)
   useEffect(() => {
-    setPagination({
-      pageIndex: constants.DEFAULT_PAGE,
-      pageSize: 200, // Updated default to 200
-    });
-  }, [columnFilters, sorting]);
-
-  // Update totalRecords from fetch
-  useEffect(() => {
-    if (membersDataHookData.data?.total) {
-      setTotalRecords(membersDataHookData.data.total);
-    }
-  }, [membersDataHookData.data?.total]);
-
-  // FIX/OPTIMIZE: Append only if data is present
-  useEffect(() => {
-    const newData = membersDataHookData?.data?.data ?? [];
-    if (newData.length > 0) {
-      setAllData((prev) => lastCursor ? [...prev, ...newData] : newData); // FIX: replace if no lastCursor
-    }
-  }, [membersDataHookData.data, lastCursor]);
-
-  const handlePaginationData = useCallback(() => {
-    const start = (pagination.pageIndex - 1) * pagination.pageSize;
+    const start = pagination.pageIndex * pagination.pageSize;
     const end = start + pagination.pageSize;
-    if (end > allData.length && allData.length < totalRecords) {
-      const lastRecord = allData[allData.length - 1];
-      if (lastRecord) {
-        setLastCursor({
-          dx_cycle: lastRecord.cycle,
-          last_org_log: lastRecord.orgLog,
-        });
+    if (end > allData.length && allData.length < totalFiles) {
+      const lastRecord = allData[allData.length - 1] || {};
+      const newCursor = {
+        last_dx_cycle: lastRecord.cycle,
+        last_org_log: lastRecord.orgLog,
+      };
+      // Avoid setting if same (optimization)
+      if (
+        newCursor.last_dx_cycle !== lastCursor.last_dx_cycle ||
+        newCursor.last_org_log !== lastCursor.last_org_log
+      ) {
+        setLastCursor(newCursor);
       }
     }
-  }, [pagination, allData, totalRecords]);
+  }, [pagination, allData, totalFiles, lastCursor]); // Depends on allData to chain fetches
 
-  useEffect(() => {
-    handlePaginationData();
-  }, [handlePaginationData]);
-
+  // Table rows: slice from accumulated data
   const tableRows = useMemo(() => {
-    const start = (pagination.pageIndex - 1) * pagination.pageSize;
+    const start = pagination.pageIndex * pagination.pageSize;
     const end = start + pagination.pageSize;
     return allData.slice(start, end);
   }, [allData, pagination]);
 
+  // Use totalFiles for rowCount to enable full pagination
+  const rowCount = totalFiles;
+
   const table = useReactTable({
-    data: tableRows,
+    data: tableRows ?? [],
     columns: orgSetupColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    rowCount: allData.length, // Updated: use allData.length for rowCount
+    rowCount,
     manualSorting: true,
     onSortingChange: setSorting,
     manualPagination: true,
@@ -185,19 +123,11 @@ export const useOrgSetup: OrgSetupHook = () => {
     manualFiltering: true,
     onColumnFiltersChange: setColumnFilters,
     state: {
-      pagination: {
-        ...pagination,
-        pageIndex: pagination.pageIndex - 1,  // 0-based for table
-      },
+      pagination,
       columnFilters,
       sorting,
     },
   });
-
-  // Update filter store if needed
-  useEffect(() => {
-    useFilterStore.setState({ totalFilesBeingShown: allData.length });
-  }, [allData.length]);
 
   return { membersDataHookData, table };
 };
