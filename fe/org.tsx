@@ -112,7 +112,7 @@ export const useOrgSetup: OrgSetupHook = () => {
       ...colFilters,
       sortBy: id,
       sortType: desc ? sortTypes.DESC : sortTypes.ASC,
-      lastCursor,
+      ...(lastCursor ? { lastCursor } : {}), // FIX: Only include lastCursor if defined to avoid undefined in query params
     };
   }, [columnFilters, sorting, pagination.pageSize, lastCursor, colFiltersInitialState]);
 
@@ -140,8 +140,7 @@ export const useOrgSetup: OrgSetupHook = () => {
     }
   }, [membersDataHookData.data?.total]);
 
-  // FIX/OPTIMIZE: Use useUpdateEffect if available, or skip initial with flag; here assuming useUpdateEffect is imported or use effect with condition
-  // For append only if this is a continuation (lastCursor is set)
+  // FIX/OPTIMIZE: Append only if data is present
   useEffect(() => {
     const newData = membersDataHookData?.data?.data ?? [];
     if (newData.length > 0) {
@@ -151,7 +150,6 @@ export const useOrgSetup: OrgSetupHook = () => {
 
   const handlePaginationData = useCallback(() => {
     const start = (pagination.pageIndex - 1) * pagination.pageSize;
-Size;
     const end = start + pagination.pageSize;
     if (end > allData.length && allData.length < totalRecords) {
       const lastRecord = allData[allData.length - 1];
