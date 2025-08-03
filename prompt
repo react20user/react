@@ -1,0 +1,9 @@
+I have a react app and fast API backend.
+In my react app, I have a table with manual backend pagination and filters, when a filter is applied, data will be fetched and updated in the table.
+ 
+In backend, when call goes to API, I want to asynchronously do so other operation using the filter, store the processed the data from asynchronous processing in a TTL cache
+ 
+In the UI, where I am showing the table, In that page there is another component, In that page I want to show the data from the TTL cache. To that component, I want to get that data from zustand store.
+ 
+explain how I can achieve above. In most efficient way. Lets just discuss the approach. later we can get into impl.
+concise.
