@@ -1,0 +1,222 @@
+[
+  {
+    "user_id": "user4",
+    "filters": {
+      "cycle": "2025-Q1",
+      "orgLog": ["MWHA_CCMP"],
+      "orgCd": "ORG456",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "AnalystX"
+    },
+    "timestamp": "2025-08-06T10:00:00"
+  },
+  {
+    "user_id": "user5",
+    "filters": {
+      "cycle": "2025-Q2",
+      "orgLog": ["ABC"],
+      "orgCd": "ORG123",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "null"
+    },
+    "timestamp": "2025-08-06T10:00:10"
+  },
+  {
+    "user_id": "user2",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["DEF_GHI"],
+      "orgCd": "null",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "AnalystX"
+    },
+    "timestamp": "2025-08-06T10:00:14"
+  },
+  {
+    "user_id": "user3",
+    "filters": {
+      "cycle": "2025-Q1",
+      "orgLog": [],
+      "orgCd": "ORG456",
+      "engmtManager": "null",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:00:48"
+  },
+  {
+    "user_id": "user2",
+    "filters": {
+      "cycle": "2025-Q1",
+      "orgLog": ["MWHA_CCMP"],
+      "orgCd": "ORG123",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "null"
+    },
+    "timestamp": "2025-08-06T10:00:56"
+  },
+  {
+    "user_id": "user5",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["JKL"],
+      "orgCd": "null",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "AnalystX"
+    },
+    "timestamp": "2025-08-06T10:00:54"
+  },
+  {
+    "user_id": "user3",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["JKL"],
+      "orgCd": "ORG456",
+      "engmtManager": "null",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:01:46"
+  },
+  {
+    "user_id": "user2",
+    "filters": {
+      "cycle": "2025-Q1",
+      "orgLog": ["DEF_GHI"],
+      "orgCd": "null",
+      "engmtManager": "null",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:02:12"
+  },
+  {
+    "user_id": "user1",
+    "filters": {
+      "cycle": "2025-Q1",
+      "orgLog": ["ABC"],
+      "orgCd": "ORG456",
+      "engmtManager": "null",
+      "acoAnalyst": "null"
+    },
+    "timestamp": "2025-08-06T10:03:36"
+  },
+  {
+    "user_id": "user2",
+    "filters": {
+      "cycle": "2025-Q1",
+      "orgLog": ["JKL"],
+      "orgCd": "ORG456",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:05:00"
+  },
+  {
+    "user_id": "user3",
+    "filters": {
+      "cycle": "2025-Q1",
+      "orgLog": [],
+      "orgCd": "ORG123",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "null"
+    },
+    "timestamp": "2025-08-06T10:05:20"
+  },
+  {
+    "user_id": "user5",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["ABC"],
+      "orgCd": "ORG456",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:06:31"
+  },
+  {
+    "user_id": "user5",
+    "filters": {
+      "cycle": "2025-Q2",
+      "orgLog": ["JKL"],
+      "orgCd": "ORG123",
+      "engmtManager": "null",
+      "acoAnalyst": "AnalystX"
+    },
+    "timestamp": "2025-08-06T10:06:54"
+  },
+  {
+    "user_id": "user5",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["JKL"],
+      "orgCd": "ORG456",
+      "engmtManager": "null",
+      "acoAnalyst": "null"
+    },
+    "timestamp": "2025-08-06T10:07:20"
+  },
+  {
+    "user_id": "user1",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["JKL"],
+      "orgCd": "ORG123",
+      "engmtManager": "ManagerA",
+      "acoAnalyst": "null"
+    },
+    "timestamp": "2025-08-06T10:08:40"
+  },
+  {
+    "user_id": "user5",
+    "filters": {
+      "cycle": "2025-Q2",
+      "orgLog": ["DEF_GHI"],
+      "orgCd": "ORG123",
+      "engmtManager": "null",
+      "acoAnalyst": "AnalystX"
+    },
+    "timestamp": "2025-08-06T10:08:48"
+  },
+  {
+    "user_id": "user1",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["MWHA_CCMP"],
+      "orgCd": "ORG456",
+      "engmtManager": "null",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:08:52"
+  },
+  {
+    "user_id": "user3",
+    "filters": {
+      "cycle": "2025-Q2",
+      "orgLog": ["MWHA_CCMP"],
+      "orgCd": "ORG456",
+      "engmtManager": "ManagerB",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:09:19"
+  },
+  {
+    "user_id": "user1",
+    "filters": {
+      "cycle": "null",
+      "orgLog": ["MWHA_CCMP"],
+      "orgCd": "ORG123",
+      "engmtManager": "ManagerB",
+      "acoAnalyst": "AnalystX"
+    },
+    "timestamp": "2025-08-06T10:10:15"
+  },
+  {
+    "user_id": "user2",
+    "filters": {
+      "cycle": "2025-Q2",
+      "orgLog": ["DEF_GHI"],
+      "orgCd": "ORG456",
+      "engmtManager": "ManagerB",
+      "acoAnalyst": "AnalystY"
+    },
+    "timestamp": "2025-08-06T10:13:18"
+  }
+]
