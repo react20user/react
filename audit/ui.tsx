@@ -1,5 +1,6 @@
 // @ts-nocheck
 'use client';
+import { Fragment } from 'react';
 import { useEffect, useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -12,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@ui';
+import { Box } from '@ui';
 import cn from '@lib/cn';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_PATH; // Adjust based on your config
@@ -67,7 +69,7 @@ const OrgSetupPerformance = () => {
           }).length;
           return acc;
         }, {});
-        setFilterUsageData([{ name: 'Filter Usage', ...filterUsage }]);
+        setFilterUsageData([{ name: 'Usage', ...filterUsage }]);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -110,49 +112,53 @@ const OrgSetupPerformance = () => {
   if (loading) return <div className="text-blue">Loading...</div>;
 
   return (
-    <Accordion type="multiple" className="w-full">
-      <AccordionItem value="summary">
-        <AccordionTrigger className={cn('flex-1 select-none hover:no-underline')}>
-          <div className="text-blue title-h3 font-medium">Audit Summary (Total Actions: {totalActions}, Unique Users: {uniqueUsers})</div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <StackedBarChart data={filterUsageData} type="audit"> {/* Assuming a custom type or omit if not needed */}
-              <CartesianGrid horizontal={true} vertical={false} strokeDasharray="none" className="stroke-black/10" />
-              <XAxis dataKey="name" className="stroke-black/80 stroke-0 leading-4" fontSize={14} fontWeight={400} />
-              <YAxis className="stroke-black/80 stroke-0 leading-4" fontSize={14} fontWeight={400} />
-              <Legend />
-              {FILTER_KEYS.map(key => (
-                <Bar
-                  key={key}
-                  dataKey={key}
-                  stackId="a"
-                  fill={FILTER_COLORS[key]}
-                  radius={[4, 4, 4, 4]}
-                  className={cn('cursor-pointer')}
-                />
-              ))}
-            </StackedBarChart>
-          </ResponsiveContainer>
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="actions-per-minute">
-        <AccordionTrigger className={cn('flex-1 select-none hover:no-underline')}>
-          <div className="text-blue title-h3 font-medium">Actions Per Minute</div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={lineChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="timestamp" />
-              <YAxis allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="count" stroke="#3b82f6" />
-            </LineChart>
-          </ResponsiveContainer>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <Fragment>
+      <Box paddingX={6}>
+        <Accordion type="multiple" className="w-full">
+          <AccordionItem value="summary" className="mb-4">
+            <AccordionTrigger className={cn('flex-1 select-none hover:no-underline')}>
+              <div className="text-blue title-h3 font-medium">Audit Summary (Total Actions: {totalActions}, Unique Users: {uniqueUsers})</div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <StackedBarChart data={filterUsageData} type="audit">
+                  <CartesianGrid horizontal={true} vertical={false} strokeDasharray="none" className="stroke-black/10" />
+                  <XAxis dataKey="name" className="stroke-black/80 stroke-0 leading-4" fontSize={14} fontWeight={400} />
+                  <YAxis className="stroke-black/80 stroke-0 leading-4" fontSize={14} fontWeight={400} />
+                  <Legend />
+                  {FILTER_KEYS.map(key => (
+                    <Bar
+                      key={key}
+                      dataKey={key}
+                      stackId="a"
+                      fill={FILTER_COLORS[key]}
+                      radius={[4, 4, 4, 4]}
+                      className={cn('cursor-pointer')}
+                    />
+                  ))}
+                </StackedBarChart>
+              </ResponsiveContainer>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="actions-per-minute" className="mb-4">
+            <AccordionTrigger className={cn('flex-1 select-none hover:no-underline')}>
+              <div className="text-blue title-h3 font-medium">Actions Per Minute</div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={lineChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="timestamp" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line type="monotone" dataKey="count" stroke="#3b82f6" />
+                </LineChart>
+              </ResponsiveContainer>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </Box>
+    </Fragment>
   );
 };
 
