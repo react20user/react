@@ -25,7 +25,7 @@ const OrgSetupPerformance = () => {
           { name: 'Total Actions', value: summaryData.total_actions },
           { name: 'Unique Users', value: summaryData.unique_users }
         ]);
-        setLineChartData(summaryData.actions_per_second);
+        setLineChartData(summaryData.actions_per_minute);
 
         // Fetch logs and populate filters
         const logsRes = await fetch(`${API_BASE}/audit/orgsetup-filters`);
@@ -33,7 +33,9 @@ const OrgSetupPerformance = () => {
         const filtersByTimestamp = logs.reduce((acc, log) => {
           // Force UTC by appending 'Z' if missing
           const tsWithZ = log.timestamp.endsWith('Z') ? log.timestamp : `${log.timestamp}Z`;
-          const timestamp = new Date(tsWithZ).toISOString().split('.')[0];
+          const dt = new Date(tsWithZ);
+          dt.setSeconds(0, 0); // Truncate to minute
+          const timestamp = dt.toISOString().split('.')[0];
           if (!acc[timestamp]) acc[timestamp] = [];
           acc[timestamp].push(log.filters);
           return acc;
@@ -62,13 +64,17 @@ const OrgSetupPerformance = () => {
             {filters.length === 0 ? (
               <li className="text-blue">No filters applied</li>
             ) : (
-              filters.map((f, i) => (
-                <li key={i} className="text-blue">
-                  {`Action ${i + 1}: ${Object.entries(f)
-                    .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v || 'null'}`)
-                    .join(', ')}`}
-                </li>
-              ))
+              filters.map((f, i) => {
+                // Filter out null/empty values
+                const nonNullFilters = Object.entries(f)
+                  .filter(([_, v]) => v !== "null" && v != null && (Array.isArray(v) ? v.length > 0 : v !== ""))
+                  .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`);
+                return (
+                  <li key={i} className="text-blue">
+                    {`Action ${i + 1}: ${nonNullFilters.length > 0 ? nonNullFilters.join(', ') : 'No filters applied'}`}
+                  </li>
+                );
+              })
             )}
           </ul>
         </div>
@@ -91,7 +97,7 @@ const OrgSetupPerformance = () => {
           <Bar dataKey="value" fill="#60a5fa" /> {/* blue-400 */}
         </BarChart>
       </ResponsiveContainer>
-      <h3 className="text-blue">Actions Per Second</h3>
+      <h3 className="text-blue">Actions Per Minute</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={lineChartData}>
           <CartesianGrid strokeDasharray="3 3" />
