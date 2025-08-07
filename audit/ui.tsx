@@ -31,7 +31,9 @@ const OrgSetupPerformance = () => {
         const logsRes = await fetch(`${API_BASE}/audit/orgsetup-filters`);
         const logs = await logsRes.json();
         const filtersByTimestamp = logs.reduce((acc, log) => {
-          const timestamp = new Date(log.timestamp).toISOString().split('.')[0];
+          // Force UTC by appending 'Z' if missing
+          const tsWithZ = log.timestamp.endsWith('Z') ? log.timestamp : `${log.timestamp}Z`;
+          const timestamp = new Date(tsWithZ).toISOString().split('.')[0];
           if (!acc[timestamp]) acc[timestamp] = [];
           acc[timestamp].push(log.filters);
           return acc;
@@ -53,15 +55,15 @@ const OrgSetupPerformance = () => {
       const filters = filtersByTimestamp[label] || [];
       return (
         <div className="bg-white p-4 border border-gray-300 rounded shadow">
-          <p className="text-blue-500 font-bold">{`Timestamp: ${label}`}</p>
-          <p className="text-blue-500">{`Actions: ${payload[0].value}`}</p>
-          <p className="text-blue-500 font-bold">Filters:</p>
+          <p className="text-blue font-bold">{`Timestamp: ${label}`}</p>
+          <p className="text-blue">{`Actions: ${payload[0].value}`}</p>
+          <p className="text-blue font-bold">Filters:</p>
           <ul className="list-disc pl-4">
             {filters.length === 0 ? (
-              <li className="text-blue-600">No filters applied</li>
+              <li className="text-blue">No filters applied</li>
             ) : (
               filters.map((f, i) => (
-                <li key={i} className="text-blue-600">
+                <li key={i} className="text-blue">
                   {`Action ${i + 1}: ${Object.entries(f)
                     .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v || 'null'}`)
                     .join(', ')}`}
@@ -75,11 +77,11 @@ const OrgSetupPerformance = () => {
     return null;
   };
 
-  if (loading) return <div className="text-blue-500">Loading...</div>;
+  if (loading) return <div className="text-blue">Loading...</div>;
 
   return (
     <div>
-      <h3 className="text-blue-500">Audit Summary</h3>
+      <h3 className="text-blue">Audit Summary</h3>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={summaryData}>
           <XAxis dataKey="name" />
@@ -89,7 +91,7 @@ const OrgSetupPerformance = () => {
           <Bar dataKey="value" fill="#60a5fa" /> {/* blue-400 */}
         </BarChart>
       </ResponsiveContainer>
-      <h3 className="text-blue-500">Actions Per Second</h3>
+      <h3 className="text-blue">Actions Per Second</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={lineChartData}>
           <CartesianGrid strokeDasharray="3 3" />
