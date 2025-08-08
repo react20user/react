@@ -1,163 +1,129 @@
-// useOrgSetup.ts
-
+// src/hooks > TS useOrgSetup.ts > © GetOrgSetupDataHookParams > sortType
+// use-client
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
-import { orgSetupColumns } from '@components/OrgSetup/Columns'; // Assuming this is the import for columns
-import constants from '@constants';
-import { useUpdateEffect } from 'react-use'; // Assuming this is the library for useUpdateEffect
-import { useFilterStore, type FilterData } from '@store/useFilterStore'; // Import the store
-import type { GetOrgSetupDataHookParams, GetOrgSetupOutput, OrgSetupHookOutput } from '@features/orgSetup/orgSetup.types'; // Assuming types file
-import { useOrgSetupData } from '@hooks/useOrgSetupData'; // Assuming this is for data fetching, but from snippets it's inline
+import membersColumns from '@components/Opportunities/MembersList/Columns';
+import constants, { filterTypes, leadStatuses, sortTypes } from '@constants';
+import { useMembersData } from '@features/members/useMembersData';
+import { useDebounce } from '@hooks/useDebounce';
+import { useUpdateEffect } from '@hooks/useUpdateEffect';
+import { useStore } from '@store';
+import type { PaginatedOutput } from '@types/axios.type';
+import type { FilterType } from '@types/constants.type';
+import type { UseQueryResult } from '@tanstack/react-query';
+import type { ColumnFilter, PaginationState, SortingState, Table } from '@tanstack/react-table';
+import type { GetMembersExpandedOutput, GetOrgSetupFinalOutput, GetOrgSetupOutput, GetOrgSetupDataHookParams } from '@features/members/members.type';
+import { table } from 'console';
+import { all } from 'axios';
+import { FilterData, useFilterStore } from '@store/useFilterStore';
 
-// Other necessary imports...
-import { useNoCheck } from '@ts-nocheck'; // If needed from snippets
+export interface GetOrgSetupOutput {
+  cycle: string | null;
+  orgLog: string | null;
+  orgCd: string | null;
+  file: string | null;
+  cadence: string | null;
+  refresh: string | null;
+  file_type: string | null;
+  has_header: string | null;
+  delimiter: string | null;
+  custom_logic: string | null;
+  engmtManager: string | null;
+  acoAnalyst: string | null;
+}
+
+export interface OrgSetupHookOutput {
+  membersDataHookData: UseQueryResult<PaginatedOutput<GetOrgSetupFinalOutput> | undefined>;
+  table: Table<GetOrgSetupOutput>;
+}
+
+export type OrgSetupHook = () => OrgSetupHookOutput;
 
 export const useOrgSetup: OrgSetupHook = () => {
-  const { currentFiltersApplied, updateCurrentFilters, fetchFilteredFilesCount } = useFilterStore();
-
-  const derivedColumnFilters = useMemo(
-    () =>
-      Object.entries(currentFiltersApplied).map(([id, value]) => ({
-        id,
-        value: value || [],
-      })),
-    [currentFiltersApplied]
-  );
-
-  const [allData, setAllData] = useState<GetOrgSetupFinalOutput[]>([]);
-  const [lastCursor, setLastCursor] = useState<{ last_dx_cycle?: string; last_org_log?: string } | undefined>(undefined);
-  const [totalFiles, setTotalFiles] = useState<number>(0);
-
+  const [allData, setAllData] = useState<GetOrgSetupOutput[]>([]);
+  const [lastCursor, setLastCursor] = useState<{ last_dx_cycle: string; last_org_log: string; } | undefined>(undefined);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'cycle', desc: true }]);
   const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: constants.DEFAULT_PAGE,
+    pageIndex: 0,
     pageSize: constants.DEFAULT_LIMIT_FOR_ORGSETUP,
   });
 
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: 'cycle',
-      desc: true,
-    },
-  ]);
+  const { currentFiltersApplied, updateCurrentFilters, fetchFilteredFilesCount, totalFilesBeingShown, totalFiles } = useFilterStore();
 
-  const membersParams = useMemo<GetOrgSetupDataHookParams>(
-    () => ({
-      cycle: [],
-      orgLog: [],
-      orgCd: [],
-      engmtManager: [],
-      acoAnalyst: [],
-    } as Pick<GetOrgSetupDataHookParams, 'cycle' | 'orgLog' | 'orgCd' | 'engmtManager' | 'acoAnalyst'>),
-    []
-  );
-
-  const handlePaginationData = useCallback(() => {
-    const start = (pagination.pageIndex - 1) * pagination.pageSize;
-    const end = start + pagination.pageSize;
-    return allData.slice(start, end);
-  }, [allData, pagination]);
-
-  useEffect(() => {
-    // Fetch initial total files count
-    const fetchTotal = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/org-setup/total-files-count`);
-        const data = await res.json();
-        if (data.count) {
-          setTotalFiles(data.count);
-        }
-      } catch (err) {
-        console.warn('Failed to fetch total files count');
-      }
-    };
-    fetchTotal();
-  }, []);
+  const derivedColumnFilters = useMemo<ColumnFilter[]>(() => {
+    return Object.entries(currentFiltersApplied).map(([id, value]) => ({
+      id,
+      value: value || [],
+    }));
+  }, [currentFiltersApplied]);
 
   useUpdateEffect(() => {
-    // Trigger fetchFilteredFilesCount when filters change
-    if (Object.values(currentFiltersApplied).some((v) => v.length > 0)) {
+    const areFiltersDifferent = Object.entries(currentFiltersApplied).some(([key, value]) => value.length > 0);
+    if (areFiltersDifferent || allFiltersEmpty) {
       fetchFilteredFilesCount(currentFiltersApplied);
-    } else {
-      // Reset to total if no filters
-      useFilterStore.getState().set({ filteredFilesCount: totalFiles });
     }
-  }, [currentFiltersApplied, totalFiles]);
+  }, [currentFiltersApplied]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let url = new URLSearchParams();
-        // Build query from currentFiltersApplied and pagination/lastCursor/sorting
-        Object.entries(currentFiltersApplied).forEach(([key, value]) => {
-          value.forEach((v) => url.append(key, v));
-        });
-        if (lastCursor) {
-          url.append('last_dx_cycle', lastCursor.last_dx_cycle || '');
-          url.append('last_org_log', lastCursor.last_org_log || '');
-        }
-        if (sorting[0]) {
-          url.append('sortBy', sorting[0].id);
-          url.append('sortType', sorting[0].desc ? 'DESC' : 'ASC');
-        }
-
-        const res = await fetch(`${API_BASE}/org-setup?${url.toString()}&limit=${pagination.pageSize}`);
-        const newData: PaginatedOutput<GetOrgSetupOutput> = await res.json();
-
-        if (newData.data?.length) {
-          setAllData((prev) => [...prev, ...newData.data]);
-          setLastCursor({
-            last_dx_cycle: newData.lastRecord?.cycle,
-            last_org_log: newData.lastRecord?.orgLog,
-          });
-        }
-      } catch (err) {
-        console.error('Failed to fetch data', err);
-      }
-    };
-
-    if (allData.length < totalFiles) {
-      fetchData();
+    if (newData?.length > 0) {
+      setAllData((prev) => [...prev, ...newData]);
     }
-  }, [pagination, sorting, currentFiltersApplied, allData.length, totalFiles]); // Dependencies
+  }, [membersDataHookData.data?.data]);
+
+  useUpdateEffect(() => {
+    useFilterStore.setState({ totalFilesBeingShown: allData.length });
+  }, [allData]);
+
+  const handlePaginationData = useCallback(() => {
+    const start = pagination.pageIndex * pagination.pageSize;
+    const end = start + pagination.pageSize;
+    return allData.slice(start, end);
+  }, [pagination, allData]);
 
   const tablerows = useMemo(() => handlePaginationData(), [handlePaginationData]);
 
-  const table = useReactTable<GetOrgSetupOutput>({
+  const rowCount = allData.length;
+
+  const table = useReactTable({
     data: tablerows ?? [],
     columns: orgSetupColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    rowCount: totalFiles,
-    manualSorting: true,
-    manualPagination: true,
-    manualFiltering: true,
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: (updater) => {
-      const newFiltersArray =
-        typeof updater === 'function' ? updater(derivedColumnFilters) : updater;
-      const newFiltersObject = newFiltersArray.reduce<Partial<FilterData>>(
-        (acc, { id, value }) => {
-          acc[id as keyof FilterData] = value as string[];
-          return acc;
-        },
-        {}
-      );
-      updateCurrentFilters(newFiltersObject);
-    },
     state: {
-      pagination,
       sorting,
       columnFilters: derivedColumnFilters,
+      pagination,
     },
+    manualSorting: true,
+    onSortingChange: setSorting,
+    manualFiltering: true,
+    onColumnFiltersChange: (updater) => {
+      let newFiltersArray: ColumnFilter[];
+      if (typeof updater === 'function') {
+        newFiltersArray = updater(derivedColumnFilters);
+      } else {
+        newFiltersArray = updater;
+      }
+      const newFiltersObject = newFiltersArray.reduce<Partial<FilterData>>((acc, filter) => {
+        acc[filter.id as keyof FilterData] = filter.value as string[];
+        return acc;
+      }, {});
+      updateCurrentFilters(newFiltersObject);
+    },
+    manualPagination: true,
+    onPaginationChange: setPagination,
+    rowCount: rowCount,
   });
 
-  const membersDataHookData = useMemo<UseQueryResult<PaginatedOutput<GetOrgSetupFinalOutput>> | undefined>(
-    () => ({
-      data: { data: allData, table },
-    }),
-    [allData, table]
-  );
+  useEffect(() => {
+    handlePaginationData();
+  }, [pagination]);
+
+  useEffect(() => {
+    if (end > allData.length && allData.length < totalFiles) {
+      setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }));
+    }
+  }, [pagination, allData, totalFiles]);
 
   return { membersDataHookData, table };
 };
