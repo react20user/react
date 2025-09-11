@@ -7,3 +7,7 @@ In the UI, where I am showing the table, In that page there is another component
  
 explain how I can achieve above. In most efficient way. Lets just discuss the approach. later we can get into impl.
 concise.
+
+
+
+So basically, the application helps the user track how a particular member moves through organisations over a period of time. This can be dependent on a few factors of the member like location etc.the application will show a set of tables from start to end showing how the member's organizations changed over a period of time.
