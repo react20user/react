@@ -11,3 +11,33 @@ concise.
 
 
 So basically, the application helps the user track how a particular member moves through organisations over a period of time. This can be dependent on a few factors of the member like location etc.the application will show a set of tables from start to end showing how the member's organizations changed over a period of time.
+
+
+
+
+
+Data Express UI
+
+A centralized interface for Engagement Managers and Analysts to view organizational setup data, file delivery status, and file content.
+
+Org Setup (Beta Testing Phase)
+
+- Showcases file setup for an organization for a specific cycle. The module displays a table with key setup columns, offering filter and export capabilities.
+
+SFTP Status (Development in progress)
+
+- Track file SFTP delivery status, timestamp and SFTP tag information.
+
+Data Analysis (TODO)
+
+- View file data sent to organizations in a table, focusing on key data elements such as member ID and claim line ID.
+- Role based access control enabled for Data Analysis.
+
+Files Supported: Aetna Code, Attribution, Capitaton, Claim Diagnosis Crosswalk, Claims, Clinical Reporting Package, Commercial Gaps in Care, Delegation, Enrollment / COE6, FAQs, Lab Results, Medical Case, MORS-D, MORS-E-G, MORS-J, MORS-M, MORS-L, MA04, Patient Profile / ENROLL07, Pharmacy, Premium / MMR, Provider
+
+Data Express ChatBot
+
+- The system uses a multi-agent architecture, with specialized agents (PARM, FTP, QA) coordinated by an intelligent router powered by Gemini LLMs and LangGraph for stateful workflow orchestration.
+- FAQ and documentation queries leverage RAG (Retrieval-Augmented Generation) with semantic search, storing vectorized embeddings in ChromaDB for efficient knowledge retrieval.
+- The tech stack integrates Google ADK, LangChain, Vertex AI, and Streamlit, enabling enterprise-grade features like real-time data integration, context-aware memory management, and HIPAA-compliant security.
+- The project is migrating its streaming and UI components from Streamlit to a modern React frontend and FastAPI backend for improved scalability and flexibility.
