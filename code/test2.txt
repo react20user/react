@@ -1,0 +1,79 @@
+ Connected Groups
+Relationships between people are represented in a matrix of binary digits. For example, the relationships for person 0 with persons 0 through 5 might be shown as "10100", meaning person 0 knows persons 0, 2, and 3.
+A relationship is transitive. If person 0 knows person 2 and person 2 knows person 3, then person 0 knows person 3 indirectly. A group consists of all people who know one another, whether directly or indirectly.
+Determine the number of distinct groups in the relationship matrix.
+
+Example
+Consider the following relationships matrix:
+
+Persons 0 and 1 are connected, while person 2 is not. There are 2 groups.
+
+Note: The method signatures may vary slightly depending on the requirements of the chosen language. For example, C language will have an argument that represents the number of rows and columns in the matrix. Also, Java will receive a list rather than an array.
+
+Function Description
+Complete the function countGroups in the editor with the following parameter(s):
+string related[n]: an array of strings of binary digits related[i] that represent connections of people
+
+Returns
+int: an integer that represents the number of groups of people
+
+Constraints
+• 1 ≤ n ≤ 300
+• 0 ≤ i < n
+• Each related[i] contains a binary string of n zeros and ones. related is a square matrix.
+
+▼ Input Format for Custom Testing
+The first line contains an integer n, the size of the square association matrix, related.
+The next n lines each contain a binary string of length n that represents a row in the matrix, related[i] where 0 ≤ i < n.
+
+▼ Sample Case 0
+Sample Input
+STDIN      Function
+-----      --------
+4        → size of related[] n = 4
+1100     → related = ['1100', '1110', '0110', '0001']
+1110
+0110
+0001
+
+Sample Output
+2
+
+Explanation
+Squares highlighting a connection between two people are highlighted in green. Each of the people is known to self, so they are highlighted in gray.
+
+related[]
+    0  1  2  3
+0   [ 1  1  0  0 ]
+1   [ 1  1  1  0 ]
+2   [ 0  1  1  0 ]
+3   [ 0  0  0  1 ]
+
+There are n = 4 people numbered related[0] through related[3], related[0] and related[1] know each other (related[0], related[1]), and (related[1], related[2]). Because a relation is transitive, the set of people related[0], related[1], related[2] is considered a single group.
+The remaining person, related[3], does not know any other people and is a separate group: related[3].
+There are a total of 2 groups.
+
+▼ Sample Case 1
+Sample Input
+STDIN      Function
+-----      --------
+5        → size of related[] n = 5
+10000    → related = ['10000', '01000', '00100', '00010', '00001']
+01000
+00100
+00010
+00001
+
+Sample Output
+5
+
+Explanation
+related[]
+    0  1  2  3  4
+0   [ 1  0  0  0  0 ]
+1   [ 0  1  0  0  0 ]
+2   [ 0  0  1  0  0 ]
+3   [ 0  0  0  1  0 ]
+4   [ 0  0  0  0  1 ]
+
+No direct relationships are shown so there are 5 groups: related[0], related[1], related[2], related[3], and related[4].
