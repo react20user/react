@@ -1,174 +1,326 @@
- ### QUESTION DESCRIPTION
+### README.md
+```
+Introduction
 
-#### Spring Boot: Item Inventory API
+NOTE: Utilizing programming help tools like ChatGPT or Copilot, as well as installing additional packages, is strictly prohibited.
 
-Create a Spring Boot ORM/Hibernate-based MVC that provides the REST endpoints for a basic inventory management system. For this project, the inventory system contains only the single entity named Item.
+The test is divided into two parts, a refactoring part and an implementation part.
+- The refactoring part is meant to test your ability to refactor code and apply clean code principles.
+- The implementation part is meant to test your ability to reuse existing code and solve problems.
 
-The definitions and detailed requirements are listed below. The submission will be graded on whether the application performs data retrieval and manipulation based on given use cases exactly as described in the requirements.
+[Keep in mind acronyms such as SOLID, KISS, DRY and YAGNI.]
 
-Each item data is a JSON object. Each such object has the following properties:
-- `itemId`: the unique integer ID of the object
-- `itemName`: the name of the item
-- `itemEnteredByUser`: the name of the user entering the item
-- `itemEnteredDate`: the timestamp at which the item was saved to the database (defaults to the current system timestamp)
-- `itemBuyingPrice`: a Double value, up to one decimal place, denoting the item buying price
-- `itemSellingPrice`: a Double value, up to one decimal place, denoting the item selling price
-- `itemLastModifiedDate`: the timestamp at which the item is modified (defaults to the current system timestamp)
-- `itemLastModifiedByUser`: the name of the user modifying the item
-- `itemStatus`: enum value, either AVAILABLE or SOLD
+Areas of Screening
 
-Here is an example of an Item data JSON object:
-```json
-{
-  "itemId": 1,
-  "itemName": "item1",
-  "itemEnteredByUser": "user_1",
-  "itemEnteredDate": "2020-05-05T13:00:41.499",
-  "itemBuyingPrice": 50.0,
-  "itemSellingPrice": 55.0,
-  "itemLastModifiedDate": "2020-05-05T13:00:41.499",
-  "itemLastModifiedByUser": null,
-  "itemStatus": "AVAILABLE"
+This candidate assessment screens for
+1. Refactoring Skills: Ability to improve code structure and readability while adhering to clean code principles
+2. System Architecture and Optimization Skills: in enhancing system performance, particularly through implementing caching strategies
+3. Adaptability: Ability to work effectively with pre-existing codebases and adhere to set constraints.
+
+Case Study (50 min)
+
+You're joining a team tasked with enhancing a key component of a larger payment system. This segment, developed several years ago, has seen numerous hands in its maintenance, leading to a somewhat disorganized structure and unclear naming conventions. Additionally, the code lacks robust testing, and the existing tests are not particularly clear or effective.
+
+A significant challenge is the system's performance limitations, partly due to its reliance on a slow database. The current setup uses a JSON file managed by Jackson, but for the sake of this scenario, think of it as a sluggish database. To address this, your team has decided to introduce a caching layer, aiming to minimize database calls and boost overall performance.
+
+Another major focus is on refactoring the existing codebase. The goal here is to transform it into a more coherent, manageable, and developer-friendly structure. This revamp is essential for improving maintainability and facilitating more efficient future updates or modifications.
+```
+
+### CacheLimits.java
+```
+/**
+ * @property maxItemsCount
+ * Maximum count of items (*inclusive*) that this cache is allowed to contain
+ */
+public class CacheLimits {
+    private final int maxItemsCount;
+
+    public CacheLimits(int maxItemsCount) { this.maxItemsCount = maxItemsCount; }
+
+    public int getMaxItemsCount() { return maxItemsCount; }
 }
 ```
 
-#### Implement the /app/item REST endpoint for the following operations:
+### Client.java
+```
+package com.speechify;
 
-- **POST request to /app/item**
-  - Request body:
-    ```json
-    {
-      "itemId": 1,
-      "itemName": "item1",
-      "itemEnteredByUser": "user_1",
-      "itemEnteredDate": "2020-05-05T13:00:41.499",
-      "itemBuyingPrice": 50.0,
-      "itemSellingPrice": 55.0,
-      "itemLastModifiedDate": "2020-05-05T13:00:41.499",
-      "itemLastModifiedByUser": "user_2",
-      "itemStatus": "AVAILABLE"
+public class Client {
+    private String id;
+    private String name;
+
+    public Client() {
     }
-    ```
-  - This adds a new object to the database with the given properties and itemId 1.
-  - POST request to /app/item
-    - Request body:
-      ```json
-      {
-        "itemId": 1,
-        "itemName": "item2",
-        "itemEnteredByUser": "user_2",
-        "itemLastModifiedByUser": "user_2"
-      }
-      ```
-    - The response code is 400 since the item with that itemId already exists in the database.
-  - PUT request to /app/item/{itemId}
-    - Request body:
-      ```json
-      {
-        "itemId": 1,
-        "itemName": "item2",
-        "itemEnteredByUser": "user_1",
-        "itemEnteredDate": "2020-05-05T13:00:41.499",
-        "itemBuyingPrice": 50.0,
-        "itemSellingPrice": 55.0,
-        "itemLastModifiedDate": "2020-05-05T13:00:41.499",
-        "itemLastModifiedByUser": "user_2",
-        "itemStatus": "AVAILABLE"
-      }
-      ```
-    - The response code is 200, and when converted to JSON, the response body is:
-      ```json
-      {
-        "itemId": 1,
-        "itemName": "item2",
-        "itemEnteredByUser": "user_1",
-        "itemEnteredDate": "2020-05-05T13:00:41.499",
-        "itemBuyingPrice": 50.0,
-        "itemSellingPrice": 55.0,
-        "itemLastModifiedDate": "2020-05-05T13:00:41.499",
-        "itemLastModifiedByUser": "user_2",
-        "itemStatus": "AVAILABLE"
-      }
-      ```
 
-- **GET request to /app/item/{itemId}**
-  - should accept GET requests at /app/item/{itemId} where itemId is a path variable
-  - should return all the items from the database with return status code 200
-  - GET request to /app/item/1
-    - The response code is 200, and when converted to JSON, the response body is:
-      ```json
-      {
-        "itemId": 1,
-        "itemName": "item1",
-        "itemEnteredByUser": "user_1",
-        "itemEnteredDate": "2020-05-05T13:00:41.499",
-        "itemBuyingPrice": 50.0,
-        "itemSellingPrice": 55.0,
-        "itemLastModifiedDate": "2020-05-05T13:00:41.499",
-        "itemLastModifiedByUser": null,
-        "itemStatus": "AVAILABLE"
-      }
-      ```
-  - GET request to /app/item
-    - The response code is 200, and this returns the array of all the items as JSON.
-  - GET request to /app/item?itemStatus=AVAILABLE&itemEnteredByUser=user1
-    - The response code is 200, and this returns the matching items as a JSON response.
-  - GET request to /app/item?pageSize=5&page=2&sortBy=itemName
-    - The response code is 200, and this returns page 2 sorted by itemName as a JSON response.
-
-- **DELETE request to /app/item/{itemId}**
-  - DELETE request to /app/item/1
-    - Assuming that the object with itemId 1 exists, then the response code is 200 and the specified object is deleted from the database.
-  - DELETE request to /app/item
-    - This deletes all the items from the database.
-  - DELETE request to /app/item/200, and this does not exist in the database.
-    - The response code is 404.
-
-- **PUT request to /app/item/{itemId}**
-  - should accept PUT requests at /app/item/{itemId} where itemId is a path variable
-  - if the itemId exists in the database, it should update and return the updated item as a response with status code 200
-  - if the itemId doesn’t exist in the database, it should return status code 404
-
-#### Example requests and responses:
-
-- **POST request to /app/item**
-  - Request body:
-    ```json
-    {
-      "itemId": 1,
-      "itemName": "item1",
-      "itemEnteredByUser": "user_1",
-      "itemEnteredDate": "2020-05-05T13:00:41.499",
-      "itemBuyingPrice": 50.0,
-      "itemSellingPrice": 55.0,
-      "itemLastModifiedDate": "2020-05-05T13:00:41.499",
-      "itemLastModifiedByUser": null,
-      "itemStatus": "AVAILABLE"
+    public Client(String id, String name) {
+        this.id = id;
+        this.name = name;
     }
-    ```
-  - The response code is 201, and when converted to JSON, the response body is:
-    ```json
-    {
-      "itemId": 1,
-      "itemName": "item1",
-      "itemEnteredByUser": "user_1",
-      "itemEnteredDate": "2020-05-05T13:00:41.499",
-      "itemBuyingPrice": 50.0,
-      "itemSellingPrice": 55.0,
-      "itemLastModifiedDate": "2020-05-05T13:00:41.499",
-      "itemLastModifiedByUser": null,
-      "itemStatus": "AVAILABLE"
+
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+}
+```
+
+### ClientRepository.java
+```
+package com.speechify;
+
+import ...
+
+public class ClientRepository {
+    private static final String DB_FILE = "db.json";
+    private final ObjectMapper objectMapper;
+
+    public ClientRepository() { this.objectMapper = new ObjectMapper(); }
+
+    public CompletableFuture<Client> getById(String id) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                File dbFile = new File(DB_FILE);
+                if (!dbFile.exists()) {
+                    return null;
+                }
+                ObjectNode root = (ObjectNode) objectMapper.readTree(dbFile);
+                ArrayNode clients = (ArrayNode) root.get("clients");
+                for (int i = 0; i < clients.size(); i++) {
+                    ObjectNode clientNode = (ObjectNode) clients.get(i);
+                    if (clientNode.get("id").asText().equals(id)) {
+                        Client client = new Client();
+                        client.setId(clientNode.get("id").asText());
+                        client.setName(clientNode.get("name").asText());
+                        return client;
+                    }
+                }
+                return null;
+            } catch (IOException e) {
+                return null;
+            }
+        });
     }
-    ```
-  - If the itemId already exists in the database, then it should return status code 400.
 
-- **DELETE request to /app/item/{itemId}**
-  - DELETE request to /app/item/1
-    - Assuming that the object with itemId 1 exists, then the response code is 200 and the specified object is deleted.
+    public CompletableFuture<List<Client>> getAll() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                File dbFile = new File(DB_FILE);
+                if (!dbFile.exists()) {
+                    return new ArrayList<>();
+                }
+                ObjectNode root = (ObjectNode) objectMapper.readTree(dbFile);
+                ArrayNode clients = (ArrayNode) root.get("clients");
+                List<Client> clientList = new ArrayList<>();
+                for (int i = 0; i < clients.size(); i++) {
+                    ObjectNode clientNode = (ObjectNode) clients.get(i);
+                    Client client = new Client();
+                    client.setId(clientNode.get("id").asText());
+                    client.setName(clientNode.get("name").asText());
+                    clientList.add(client);
+                }
+                return clientList;
+            } catch (IOException e) {
+                return new ArrayList<>();
+            }
+        });
+    }
+}
+```
 
-- **GET request to /app/item/{itemId}**
-  - GET request to /app/item/1
-    - If the itemId exists in the database, then it should return the item with status code 200.
-  - GET request to /app/item/200
-    - If the itemId does not exist in the database, it should return status code 404.
+### LRUCache.java
+```
+package com.speechify;
 
+/**
+ * A Least Recently Used (LRU) cache is a type of cache that evicts the
+ * when there is a need to constrain its size.
+ *
+ * For this particular implementation, the size constraint is set at CacheLimits
+ * An item is considered accessed whenever `get`, or `set` methods are called
+ * This LRU cache will achieve size constraint by checking the cache size
+ * In the case where the cache has reached its limit, the item least recently
+ * This removal process will not happen on a separate thread but in the calling
+ * thus potentially blocking their return for a cleanup when deemed necessary
+ *
+ * Use the provided com.speechify.LRUCacheProviderTest in `src/test/java/LruCacheTest.java`
+ * implementation.
+ *
+ * You may:
+ * - Read online API references for Java standard library or JVM collections.
+ * You must not:
+ * - Read guides about how to code an LRU cache.
+ */
+
+public interface LRUCache<T> {
+    T get(String key);
+
+    void set(String key, T value);
+}
+```
+
+### LRUCacheProvider.java
+```
+package com.speechify;
+
+public class LRUCacheProvider {
+    public static <T> LRUCache<T> createLRUCache(CacheLimits options) {
+        throw new UnsupportedOperationException("Implement this function");
+    }
+}
+```
+
+### User.java
+```
+package com.speechify;
+
+import java.time.LocalDate;
+
+public class User {
+    private String id;
+    private Client client;
+    private LocalDate dateOfBirth;
+    private String email;
+    private String firstname;
+    private String surname;
+    private boolean hasCreditLimit;
+    private double creditLimit;
+
+    public User() {
+    }
+
+    public User(String id, Client client, LocalDate dateOfBirth, String email, String firstname, String surname, boolean hasCreditLimit, double creditLimit) {
+        this.id = id;
+        this.client = client;
+        this.dateOfBirth = dateOfBirth;
+        this.email = email;
+        this.firstname = firstname;
+        this.surname = surname;
+        this.hasCreditLimit = hasCreditLimit;
+        this.creditLimit = creditLimit;
+    }
+
+    public String getId() { return id; }
+
+    public void setId(String id) { this.id = id; }
+}
+```
+
+
+
+Based on the provided image, here is the content of each file as accurately as possible. Note that the image shows multiple files open, but only partial content is visible for some files. I will transcribe the visible content for each file:
+
+### 1. `UserService.java`
+```java
+public class UserService { no usages & Speechify Recruiting Bot
+
+    public CompletableFuture<Boolean> addUser() { no usages & Speechify Recruiting Bot
+    };
+
+    public CompletableFuture<Boolean> updateUser(User user) { no usages & Speechify Recruiting Bot
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                if (user == null) {
+                    return false;
+                }
+                File dbFile = new File(DB_FILE);
+                if (!dbFile.exists()) {
+                    return false;
+                }
+                ObjectNode root = (ObjectNode) objectMapper.readTree(dbFile);
+                ArrayNode users = (ArrayNode) root.get("users");
+
+                // Find and update user
+                for (int i = 0; i < users.size(); i++) {
+                    ObjectNode userNode = (ObjectNode) users.get(i);
+                    if (userNode.get("id").asText().equals(user.getId())) {
+                        users.set(i, objectMapper.valueToTree(user));
+                        objectMapper.writeValue(dbFile, root);
+                        return true;
+                    }
+                }
+                return false;
+            } catch (IOException e) {
+                return false;
+            }
+        });
+    };
+
+    public CompletableFuture<User> getUserByEmail(String email) { no usages & Speechify Recruiting Bot
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                File dbFile = new File(DB_FILE);
+                if (!dbFile.exists()) {
+                    return null;
+                }
+                ObjectNode root = (ObjectNode) objectMapper.readTree(dbFile);
+                ArrayNode users = (ArrayNode) root.get("users");
+                for (int i = 0; i < users.size(); i++) {
+                    ObjectNode userNode = (ObjectNode) users.get(i);
+                    if (userNode.get("email").asText().equals(email)) {
+                        return objectMapper.treeToValue(userNode, User.class);
+                    }
+                }
+                return null;
+            } catch (IOException e) {
+                return null;
+            }
+        });
+    };
+
+    public CompletableFuture<List<User>> getAllUsers() { no usages & Speechify Recruiting Bot
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                File dbFile = new File(DB_FILE);
+                if (!dbFile.exists()) {
+                    return new ArrayList<>();
+                }
+                ObjectNode root = (ObjectNode) objectMapper.readTree(dbFile);
+                ArrayNode users = (ArrayNode) root.get("users");
+                List<User> userList = new ArrayList<>();
+                for (int i = 0; i < users.size(); i++) {
+                    User user = objectMapper.treeToValue(users.get(i), User.class);
+                    userList.add(user);
+                }
+                return userList;
+            } catch (IOException e) {
+                return new ArrayList<>();
+            }
+        });
+    };
+
+    public CompletableFuture<Boolean> addUser(User user) { no usages & Speechify Recruiting Bot
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                User user = new User();
+                user.setId(UUID.randomUUID().toString());
+                user.setClient(client);
+                user.setDateOfBirth(dateOfBirth);
+                user.setEmail(email);
+                user.setFirstName(firstname);
+                user.setSurname(surname);
+
+                // Set credit limit based on client
+                if ("VeryImportantClient".equals(client.getName())) {
+                    user.setHasCreditLimit(false);
+                } else if ("ImportantClient".equals(client.getName())) {
+                    user.setHasCreditLimit(true);
+                    user.setCreditLimit(1000 * 2);
+                } else {
+                    user.setHasCreditLimit(true);
+                    user.setCreditLimit(10000);
+                }
+
+                // Add user to database
+                users.add(objectMapper.valueToTree(user));
+                objectMapper.writeValue(dbFile, root);
+                return true;
+            } catch (IOException e) {
+                return false;
+            }
+        });
+    };
+}
+```
