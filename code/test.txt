@@ -1,0 +1,174 @@
+ ### QUESTION DESCRIPTION
+
+#### Spring Boot: Item Inventory API
+
+Create a Spring Boot ORM/Hibernate-based MVC that provides the REST endpoints for a basic inventory management system. For this project, the inventory system contains only the single entity named Item.
+
+The definitions and detailed requirements are listed below. The submission will be graded on whether the application performs data retrieval and manipulation based on given use cases exactly as described in the requirements.
+
+Each item data is a JSON object. Each such object has the following properties:
+- `itemId`: the unique integer ID of the object
+- `itemName`: the name of the item
+- `itemEnteredByUser`: the name of the user entering the item
+- `itemEnteredDate`: the timestamp at which the item was saved to the database (defaults to the current system timestamp)
+- `itemBuyingPrice`: a Double value, up to one decimal place, denoting the item buying price
+- `itemSellingPrice`: a Double value, up to one decimal place, denoting the item selling price
+- `itemLastModifiedDate`: the timestamp at which the item is modified (defaults to the current system timestamp)
+- `itemLastModifiedByUser`: the name of the user modifying the item
+- `itemStatus`: enum value, either AVAILABLE or SOLD
+
+Here is an example of an Item data JSON object:
+```json
+{
+  "itemId": 1,
+  "itemName": "item1",
+  "itemEnteredByUser": "user_1",
+  "itemEnteredDate": "2020-05-05T13:00:41.499",
+  "itemBuyingPrice": 50.0,
+  "itemSellingPrice": 55.0,
+  "itemLastModifiedDate": "2020-05-05T13:00:41.499",
+  "itemLastModifiedByUser": null,
+  "itemStatus": "AVAILABLE"
+}
+```
+
+#### Implement the /app/item REST endpoint for the following operations:
+
+- **POST request to /app/item**
+  - Request body:
+    ```json
+    {
+      "itemId": 1,
+      "itemName": "item1",
+      "itemEnteredByUser": "user_1",
+      "itemEnteredDate": "2020-05-05T13:00:41.499",
+      "itemBuyingPrice": 50.0,
+      "itemSellingPrice": 55.0,
+      "itemLastModifiedDate": "2020-05-05T13:00:41.499",
+      "itemLastModifiedByUser": "user_2",
+      "itemStatus": "AVAILABLE"
+    }
+    ```
+  - This adds a new object to the database with the given properties and itemId 1.
+  - POST request to /app/item
+    - Request body:
+      ```json
+      {
+        "itemId": 1,
+        "itemName": "item2",
+        "itemEnteredByUser": "user_2",
+        "itemLastModifiedByUser": "user_2"
+      }
+      ```
+    - The response code is 400 since the item with that itemId already exists in the database.
+  - PUT request to /app/item/{itemId}
+    - Request body:
+      ```json
+      {
+        "itemId": 1,
+        "itemName": "item2",
+        "itemEnteredByUser": "user_1",
+        "itemEnteredDate": "2020-05-05T13:00:41.499",
+        "itemBuyingPrice": 50.0,
+        "itemSellingPrice": 55.0,
+        "itemLastModifiedDate": "2020-05-05T13:00:41.499",
+        "itemLastModifiedByUser": "user_2",
+        "itemStatus": "AVAILABLE"
+      }
+      ```
+    - The response code is 200, and when converted to JSON, the response body is:
+      ```json
+      {
+        "itemId": 1,
+        "itemName": "item2",
+        "itemEnteredByUser": "user_1",
+        "itemEnteredDate": "2020-05-05T13:00:41.499",
+        "itemBuyingPrice": 50.0,
+        "itemSellingPrice": 55.0,
+        "itemLastModifiedDate": "2020-05-05T13:00:41.499",
+        "itemLastModifiedByUser": "user_2",
+        "itemStatus": "AVAILABLE"
+      }
+      ```
+
+- **GET request to /app/item/{itemId}**
+  - should accept GET requests at /app/item/{itemId} where itemId is a path variable
+  - should return all the items from the database with return status code 200
+  - GET request to /app/item/1
+    - The response code is 200, and when converted to JSON, the response body is:
+      ```json
+      {
+        "itemId": 1,
+        "itemName": "item1",
+        "itemEnteredByUser": "user_1",
+        "itemEnteredDate": "2020-05-05T13:00:41.499",
+        "itemBuyingPrice": 50.0,
+        "itemSellingPrice": 55.0,
+        "itemLastModifiedDate": "2020-05-05T13:00:41.499",
+        "itemLastModifiedByUser": null,
+        "itemStatus": "AVAILABLE"
+      }
+      ```
+  - GET request to /app/item
+    - The response code is 200, and this returns the array of all the items as JSON.
+  - GET request to /app/item?itemStatus=AVAILABLE&itemEnteredByUser=user1
+    - The response code is 200, and this returns the matching items as a JSON response.
+  - GET request to /app/item?pageSize=5&page=2&sortBy=itemName
+    - The response code is 200, and this returns page 2 sorted by itemName as a JSON response.
+
+- **DELETE request to /app/item/{itemId}**
+  - DELETE request to /app/item/1
+    - Assuming that the object with itemId 1 exists, then the response code is 200 and the specified object is deleted from the database.
+  - DELETE request to /app/item
+    - This deletes all the items from the database.
+  - DELETE request to /app/item/200, and this does not exist in the database.
+    - The response code is 404.
+
+- **PUT request to /app/item/{itemId}**
+  - should accept PUT requests at /app/item/{itemId} where itemId is a path variable
+  - if the itemId exists in the database, it should update and return the updated item as a response with status code 200
+  - if the itemId doesn’t exist in the database, it should return status code 404
+
+#### Example requests and responses:
+
+- **POST request to /app/item**
+  - Request body:
+    ```json
+    {
+      "itemId": 1,
+      "itemName": "item1",
+      "itemEnteredByUser": "user_1",
+      "itemEnteredDate": "2020-05-05T13:00:41.499",
+      "itemBuyingPrice": 50.0,
+      "itemSellingPrice": 55.0,
+      "itemLastModifiedDate": "2020-05-05T13:00:41.499",
+      "itemLastModifiedByUser": null,
+      "itemStatus": "AVAILABLE"
+    }
+    ```
+  - The response code is 201, and when converted to JSON, the response body is:
+    ```json
+    {
+      "itemId": 1,
+      "itemName": "item1",
+      "itemEnteredByUser": "user_1",
+      "itemEnteredDate": "2020-05-05T13:00:41.499",
+      "itemBuyingPrice": 50.0,
+      "itemSellingPrice": 55.0,
+      "itemLastModifiedDate": "2020-05-05T13:00:41.499",
+      "itemLastModifiedByUser": null,
+      "itemStatus": "AVAILABLE"
+    }
+    ```
+  - If the itemId already exists in the database, then it should return status code 400.
+
+- **DELETE request to /app/item/{itemId}**
+  - DELETE request to /app/item/1
+    - Assuming that the object with itemId 1 exists, then the response code is 200 and the specified object is deleted.
+
+- **GET request to /app/item/{itemId}**
+  - GET request to /app/item/1
+    - If the itemId exists in the database, then it should return the item with status code 200.
+  - GET request to /app/item/200
+    - If the itemId does not exist in the database, it should return status code 404.
+
